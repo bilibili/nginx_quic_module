@@ -1,0 +1,65 @@
+ngx_addon_name="ngx_quic_module"
+
+QUIC_MODULES="                                         \
+    ngx_quic_module                                    \
+    ngx_quic_core_module                               \
+    "
+
+HTTP_QUIC_MODULES="ngx_http_quic_module"
+
+QUIC_DEPS="                                            \
+    $ngx_addon_dir/src/ngx_quic_deps.h                 \
+    $ngx_addon_dir/src/quic_stack_api.h                \
+    $ngx_addon_dir/src/ngx_quic_module.h               \
+    "
+
+QUIC_SRCS="                                            \
+    $ngx_addon_dir/src/ngx_quic_module.c               \
+    $ngx_addon_dir/src/ngx_quic_handler.c              \
+    $ngx_addon_dir/src/ngx_quic_stack.c                \
+    "
+
+HTTP_QUIC_DEPS="                                       \
+    $ngx_addon_dir/src/ngx_http_quic_deps.h            \
+    $ngx_addon_dir/src/quic_stack_api.h                \
+    $ngx_addon_dir/src/ngx_quic_module.h               \
+    "
+
+HTTP_QUIC_SRCS="                                       \
+    $ngx_addon_dir/src/ngx_http_quic_module.c          \
+    "
+
+if [ -f auto/module ] ; then
+    ngx_module_incs=$ngx_addon_dir/src
+    ngx_module_deps="$QUIC_DEPS $HTTP_QUIC_DEPS"
+    ngx_module_libs="-lngxquicstack"
+
+    if [ $ngx_module_link = DYNAMIC ] ; then
+        ngx_module_name="$QUIC_MODULES $HTTP_QUIC_MODULES"
+        ngx_module_srcs="$QUIC_SRCS $HTTP_QUIC_SRCS"
+
+        . auto/module
+
+    else
+        ngx_module_type=CORE
+        ngx_module_name=$QUIC_MODULES
+        ngx_module_srcs=$QUIC_SRCS
+
+        . auto/module
+
+        ngx_module_type=HTTP
+        ngx_module_name=$HTTP_QUIC_MODULES
+        ngx_module_srcs=$HTTP_QUIC_SRCS
+
+        . auto/module
+    fi
+
+else
+    CORE_MODULES="$CORE_MODULES $QUIC_MODULES"
+    HTTP_MODULES="$HTTP_MODULES $HTTP_QUIC_MODULES"
+
+    NGX_ADDON_DEPS="$NGX_ADDON_DEPS $QUIC_DEPS"
+    NGX_ADDON_SRCS="$NGX_ADDON_SRCS $QUIC_SRCS $HTTP_QUIC_SRCS"
+
+    CFLAGS="$CFLAGS -I$ngx_addon_dir/src -lngxquicstack -lpthread"
+fi
