@@ -180,7 +180,9 @@ void quic_stack_on_alarm_timeout(
 int quic_stack_supported_versions(
     tQuicStackHandler handler,
     char* buf,
-    size_t len);
+    size_t len,
+    uint64_t port,
+    uint64_t max_age);
 
 void quic_stack_add_on_can_write_callback_once(
     tQuicStackHandler handler,

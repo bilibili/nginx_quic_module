@@ -144,9 +144,8 @@ ngx_int_t ngx_quic_init_stack(ngx_conf_t *cf,
     ngx_pool_t               *pool;
     tQuicStackConfig          stack_conf;
     ngx_quic_stack_t         *stack;
-    const int                 kMaxLen = 128;
+    const int                 kMaxLen = 1024;
     u_char                   *p;
-    int                       rc;
 
     pool = ngx_create_pool(4096, qscf->error_log);
     if (pool == NULL) {
@@ -212,15 +211,11 @@ ngx_int_t ngx_quic_init_stack(ngx_conf_t *cf,
     }
 
     qscf->alt_svc_str.data = p;
-    p = ngx_sprintf(p, "quic=\":%d\"; ma=%d; v=\"", qscf->ls_opt->port, qscf->max_age);
-    rc = quic_stack_supported_versions(stack->handler, (char*)p, kMaxLen - 1);
-    if (rc <= QUIC_STACK_OK) {
+    qscf->alt_svc_str.len = quic_stack_supported_versions(stack->handler, (char*)p, kMaxLen - 1, qscf->ls_opt->port, qscf->max_age);
+    if (qscf->alt_svc_str.len <= QUIC_STACK_OK) {
         ngx_destroy_pool(pool);
         return NGX_ERROR;
     }
-    p += rc;
-    *(p++) = '\"';
-    qscf->alt_svc_str.len = p - qscf->alt_svc_str.data;
 
     stack->qscf  = qscf;
     qscf->stack = stack;
