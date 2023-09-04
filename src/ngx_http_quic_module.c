@@ -148,7 +148,7 @@ ngx_http_use_quic(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     if (qscf == NULL) {
       ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                     "quic stack \"%V\" not exist", value[1]);
+                     "quic stack \"%V\" not exist", &value[1]);
       return NGX_CONF_ERROR;
     }
 
